@@ -60,7 +60,7 @@ training_data = list(
 get_model = function(filename, data) {
   return(
     stan(
-      file=paste0(probe_folder, '/', filename),  
+      file=paste0(fmri_folder, '/', filename),  
       data=data, 
       cores=getOption("mc.cores", 1L), #setting the mc.cores option to be as many processors as the hardware and RAM allow (up to the number of chains)
       thin=1, 
