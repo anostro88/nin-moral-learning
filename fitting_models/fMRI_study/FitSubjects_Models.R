@@ -66,13 +66,13 @@ get_model = function(filename, data) {
 }
 
 ##### MODEL0:   0LR            2AB   1/-1 coding #####
-fit_M0 = get_model('M0_final.stan', training_data)
+fit_M0 = get_model('M0.stan', training_data)
 
 ##### MODEL1wf:  2AB  1LR wf as Trade off  1/-1 coding #####
-fit_M1wf = get_model('M1wf_final.stan', training_data)
+fit_M1wf = get_model('M1wf.stan', training_data)
 
 ##### MODEL2wfDec: 2AB  2LR + wf on Decision phase   1/-1 coding #####
-fit_M2wfDec = get_model('M2wf_wfonDec_old.stan', training_data)
+fit_M2wfDec = get_model('M2wf_Dec.stan', training_data)
 
 ##### MODEL2wfOut: 2AB  2LR + wf on Outcome phase  1/-1 coding #####
-fit_M2wfOut = get_model('M2wf_wfonOut_0612.stan', training_data)
+fit_M2wfOut = get_model('M2wf_Out.stan', training_data)

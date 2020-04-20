@@ -6,27 +6,30 @@ library("shinystan")
 library("rstan")
 library("ggplot2")
 
-fit_name = fit_M1wf
-output_name = paste0("output/", fit_name@model_name)
+# Select the model ----
+fmri_folder = "fitting_models/fMRI_study"
+MODEL_NAME = 'fit_M1wf'  # MANUALLY CHANGE THE MODEL TO ANALYZE
 
-if (fit_name@model_name == "20T_M1wf_F-AF"){ #20T_M1wf_F-AF
+# Load the fitted model ----
+load(paste0(fmri_folder, "/fitted_models/", MODEL_NAME, ".RData"))
+assign('fit_name', get(MODEL_NAME))
+output_name = paste0(fmri_folder,"/fitted_models/", fit_name@model_name)
+
+##### getting parameters of the model ####
+if (fit_name@model_name == "M1wf"){ 
   M_pars_name = c("A", "tau", "wf")
   M_mr_name = c("tbtPE", "tbtev1", "tbtev2","tbtevc")
-  } else{
-    M_pars_name = c("A", "B", "tau", "wf")
-    M_mr_name = c("tbtPEM", "tbtPES", "tbtevM", "tbtevS", "tbtbothevM", "tbtbothevS" )
-   } 
+} else if (fit_name@model_name == "M0") {
+  M_pars_name = c("tau")
+  M_mr_name = c("tbtPE", "tbtev1", "tbtev2")
+} else {
+  M_pars_name = c("A", "B", "tau", "wf")
+  M_mr_name = c("tbtPEM", "tbtPES", "tbtevM", "tbtevS", "tbtbothevM", "tbtbothevS" )
+}
 
-#FOR MO
-M_pars_name = c("tau")
-M_mr_name = c("tbtPE", "tbtev1", "tbtev2")
-
-
-# M_pars_name = c("tau")
-# M_mr_name = c("tbtPE", "tbtev1", "tbtev2","tbtevc")
-##### getting the individual and group parameters of the model (df_ind_pars, df_group_pars) ####
-summary = summary(fit_name)
-df = summary[["summary"]]
+# getting the individual and group parameters of the model (df_ind_pars, df_group_pars)
+model_summary = summary(fit_name)
+df = model_summary[["summary"]]
 df_pars_raw <- df[grepl(paste(M_pars_name, collapse="|"), row.names(df)), ] # select parameters
 par_pr <- grep(pattern = "_pr" ,row.names(df_pars_raw)) # select par before phi app
 df_clean = df_pars_raw[-par_pr,]  # keep only par after phi app
@@ -36,15 +39,7 @@ list_par = data.frame(gsub("\\[|\\]|[0-9]", '', row.names(df_mean)))
 df_pars = cbind(df_mean, list_par)
 names(df_pars) = c("mean", "pars")
 
-##### Create df for each parameter (df_par_.../df_mu_par_... ) ####
-for (i in 1:length(M_pars_name)) {
-  IndPar = M_pars_name
-  GroupPar = paste0("mu_", M_pars_name)
-  assign(paste0("df_par_",IndPar[i],  "_", fit_name@model_name), df_pars[df_pars$pars==IndPar[i],1])
-  print(assign(paste0("df_par_",GroupPar[i],  "_", fit_name@model_name), df_pars[df_pars$pars==GroupPar[i],1]))
-}
-
-##### Combine Parameters and write out ####
+#Combine Parameters and write out
 df_IndPars = as.data.frame(mget(ls(pattern = paste(paste0("df_par_", IndPar), collapse="|")), .GlobalEnv)) # get all the df with "selfPain" in the names as a list from the env
 row.names(df_IndPars) = row.names(df_IndPars) = Sublist[,1]
 write.csv(df_IndPars, paste0(output_name, "_IndPars.csv"))
@@ -56,34 +51,45 @@ write.csv(df, paste0(output_name, "_summary.csv") )
 ##### Display GROUP parameters ####
 posterior <- as.array(fit_name)
 dim(posterior)
-color_scheme_set("yellow") #M1: pink #M2Out:blue,  M2Dec:brightblue, M0:yellow
+color_scheme_set("pink") #M1: pink #M2Out:blue,  M2Dec:brightblue, M0:yellow
 
-par_1 = c("mu_A","mu_wf")  #"mu_B"
-#par_1 = c("mu_A","mu_B", "mu_wf")  #"mu_B"
-par_2 = c("mu_tau") #  "mu_alpha", "mu_beta"
+if (fit_name@model_name == "M1wf"){ 
+  par_1 = c("mu_A","mu_wf")
+} else {
+  par_1 = c("mu_A","mu_B", "mu_wf")
+}
+
+par_2 = c("mu_tau") 
+
+mcmc_areas(posterior,  
+           pars = par_1, 
+           prob = 0.8, # 80% intervals
+           prob_outer = 0.99, # 99%
+           point_est = "median")
 
 mcmc_areas(posterior,  
            pars = par_2, 
            prob = 0.8, # 80% intervals
-           prob_outer = 0.99, # 90%
+           prob_outer = 0.99, # 99%
            point_est = "median")
 
 pars_name_all = row.names(df_mean) 
 pars_name = pars_name_all[!is.element(pars_name_all, GroupPar)]
 pars = list()
 
+color_scheme_set("pink")
 for (par in M_pars_name) {
+  print(par)
   pars[[par]] = pars_name[grep(par, pars_name)]
+  print(mcmc_areas(
+    posterior,  
+    pars = pars[[par]], 
+    prob = 0.8, # 80% intervals
+    prob_outer = 0.9, # 90%
+    point_est = "median"))
 }
 
-color_scheme_set("yellow")
-mcmc_areas(posterior,  
-           pars = pars$tau, 
-           prob = 0.8, # 80% intervals
-           prob_outer = 0.9, # 90%
-           point_est = "median")
-
-##### FUNCTIONS ####
+##### getting model fit (ROC-AUC and LOOIC metrices)
 # Function for Calculating ROC curve for true_y vs y_pred
 ROC_PPC = function(fit) {
   y_pred <- rstan::extract(fit, "y_pred") # extract y_pred
@@ -100,18 +106,11 @@ ROC_PPC = function(fit) {
 }  
 #### ROC- Posterior Predictive Checks ####
 ROC_M  = ROC_PPC(fit_name) 
-
-ROC= data.frame(ROC=c(0.7781, 0.775, 0.7777), Model=c("M1wf", "M2wf_Out", "M2wf_Dec"))
-plot(ROC$ROC, ylim= c(0.5,1), xlab="model")
-
-
   
 #### LOOIC ####
-log_lik = extract_log_lik(fit_name, parameter_name = "log_lik_sub", merge_chains = TRUE) #log_lik
+log_lik = extract_log_lik(fit_name, parameter_name = "log_lik", merge_chains = TRUE) 
 loo <- loo(log_lik)
 print(loo) 
-sub_wise_LOOIC = loo[["pointwise"]]
-write.csv(sub_wise_LOOIC,paste0(output_name, "_sub_wise_LOOIC_MC.csv"), row.names = F)
 
 
 
