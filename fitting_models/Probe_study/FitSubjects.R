@@ -1,5 +1,5 @@
 ##### Load necessary libraries and set up multi-core processing for Stan #####
-library(dplyr); 
+library(dplyr);
 library(rstan);
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
