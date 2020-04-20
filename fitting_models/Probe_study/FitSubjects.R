@@ -33,6 +33,8 @@ choice = data.matrix(choice)
 # MONEY OUTCOME
 outcomeM = read.csv(paste0(data_folder, "/outcomeM.csv"), stringsAsFactors=FALSE)
 outcomeM$col_sub = NULL
+outcomeM = data.matrix(outcomeM)
+
 #SHOCK OUTCOME
 outcomeS = read.csv(paste0(data_folder, "/outcomeS.csv"), stringsAsFactors=FALSE)
 outcomeS$col_sub = NULL
@@ -40,24 +42,12 @@ outcomeS$col_sub = NULL
 # FILTER MONEY 
 filter_money = read.csv(paste0(data_folder, "/filter_ismoney.csv"), stringsAsFactors = F, header = T)
 filter_money$subID = NULL
+filter_money = data.matrix(filter_money)
 
 # FILTER SHOCK
 filter_shock = read.csv(paste0(data_folder, "/filter_isshock.csv"), stringsAsFactors = F)
 filter_shock$subID = NULL
-
-#### @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 1/-1 coding for Models 3,4,7, 10, 12 ####
-outcomeM[outcomeM == 2] = -1 #Low gain is labeled 2 --> Apun
-outcomeM[outcomeM == 1] = 1 #High gain is labeled 1 --> Arew
-outcomeM = data.matrix(outcomeM)
-
-outcomeS[outcomeS == 2] = -1 #High shock is labeled 2 --> Bpun
-outcomeS[outcomeS == 1] = 1 #Low shock is labeled 1 --> Brew
 outcomeS = data.matrix(outcomeS)
-
-filter_money$subID = NULL
-filter_money = data.matrix(filter_money)
-
-filter_shock$subID = NULL
 filter_shock = data.matrix(filter_shock)
 
 # Training data ----
@@ -91,12 +81,16 @@ get_model = function(filename, data) {
 
 ##### MODEL1wf: 1LR + wf       2AB   1/-1 coding #####
 fit_M1wf = get_model('20T_M1wf_F-AF.stan', training_data)
+save(fit_M1wf, file=paste0(probe_folder, "/fitted_models/fit_M1wf.RData"))
 
-##### MODEL2: 2LR        2AB   1/-1 coding #####
-fit_M2 = get_model('20T_M2_F.stan', training_data)
+##### MODEL2wf OUTCOME: 2LR + wf       2AB   1/-1 coding #####
+fit_M2wfOut = get_model('20T_M2wf_wfOut_F-AF.stan', training_data)
+save(fit_M2wfOut, file=paste0(probe_folder, "/fitted_models/fit_M2wfOut.RData"))
 
-##### MODEL2wf: 2LR + wf       2AB   1/-1 coding #####
-fit_M2wf = get_model('20T_M2wf_wfDec_F-AF.stan', training_data)
+##### MODEL2wf DECISION: 2LR + wf       2AB   1/-1 coding #####
+fit_M2wfDec = get_model('20T_M2wf_wfDec_F-AF.stan', training_data)
+save(fit_M2wfDec, file=paste0(probe_folder, "/fitted_models/fit_M2wfDec.RData"))
 
 ##### MODEL0: 2LR + wf       2AB   1/-1 coding #####
 fit_M0 = get_model('20T_M0_F-AF.stan', training_data)
+save(fit_M0, file=paste0(probe_folder, "/fitted_models/fit_M0.RData"))

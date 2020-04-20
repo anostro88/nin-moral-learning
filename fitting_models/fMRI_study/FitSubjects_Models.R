@@ -29,19 +29,13 @@ choice$subjID = NULL
 choice = data.matrix(choice)
 
 # MONEY OUTCOME
-outcomeM = read.csv(paste0(data_folder, "/conflictoutcomeM.csv"), stringsAsFactors=FALSE)
+outcomeM = read.csv(paste0(data_folder, "/outcomeM.csv"), stringsAsFactors=FALSE)
 outcomeM$subjID = NULL
+outcomeM = data.matrix(outcomeM)
+
 #SHOCK OUTCOME
 outcomeS = read.csv(paste0(data_folder, "/conflictoutcomeS.csv"), stringsAsFactors=FALSE)
 outcomeS$subjID = NULL
-
-#### @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-outcomeM[outcomeM == 2] = -1 #Low gain is labeled 2 --> Apun
-outcomeM[outcomeM == 1] = 1 #High gain is labeled 1 --> Arew
-outcomeM = data.matrix(outcomeM)
-
-outcomeS[outcomeS == 2] = -1 #High shock is labeled 2 --> Bpun
-outcomeS[outcomeS == 1] = 1 #Low shock is labeled 1 --> Brew
 outcomeS = data.matrix(outcomeS)
 
 # Training data ----

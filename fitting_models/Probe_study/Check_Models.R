@@ -6,10 +6,14 @@ library("shinystan")
 library("rstan")
 library("ggplot2")
 
+#Load the fitted model
+probe_folder = "fitting_models/Probe_study"
+# Select the saved model and change accordingly
+load(paste0(probe_folder, "/fitted_models/fit_M1wf.RData"))
 fit_name = fit_M1wf
-output_name = paste0("output/", fit_name@model_name)
+output_name = paste0(probe_folder,"/fitted_models/", fit_name@model_name)
 
-if (fit_name@model_name == "20T_M1wf_F-AF"){ #20T_M1wf_F-AF
+if (fit_name@model_name == "20T_M1wf_F-AF"){ 
   M_pars_name = c("A", "tau", "wf")
   M_mr_name = c("tbtPE", "tbtev1", "tbtev2","tbtevc")
   } else{
@@ -18,15 +22,13 @@ if (fit_name@model_name == "20T_M1wf_F-AF"){ #20T_M1wf_F-AF
    } 
 
 #FOR MO
-M_pars_name = c("tau")
-M_mr_name = c("tbtPE", "tbtev1", "tbtev2")
+#M_pars_name = c("tau")
+#M_mr_name = c("tbtPE", "tbtev1", "tbtev2")
 
 
-# M_pars_name = c("tau")
-# M_mr_name = c("tbtPE", "tbtev1", "tbtev2","tbtevc")
 ##### getting the individual and group parameters of the model (df_ind_pars, df_group_pars) ####
-summary = summary(fit_name)
-df = summary[["summary"]]
+model_summary = summary(fit_name)
+df = model_summary[["summary"]]
 df_pars_raw <- df[grepl(paste(M_pars_name, collapse="|"), row.names(df)), ] # select parameters
 par_pr <- grep(pattern = "_pr" ,row.names(df_pars_raw)) # select par before phi app
 df_clean = df_pars_raw[-par_pr,]  # keep only par after phi app
@@ -56,14 +58,14 @@ write.csv(df, paste0(output_name, "_summary.csv") )
 ##### Display GROUP parameters ####
 posterior <- as.array(fit_name)
 dim(posterior)
-color_scheme_set("yellow") #M1: pink #M2Out:blue,  M2Dec:brightblue, M0:yellow
+color_scheme_set("pink") #M1: pink #M2Out:blue,  M2Dec:brightblue, M0:yellow
 
 par_1 = c("mu_A","mu_wf")  #"mu_B"
 #par_1 = c("mu_A","mu_B", "mu_wf")  #"mu_B"
-par_2 = c("mu_tau") #  "mu_alpha", "mu_beta"
+par_2 = c("mu_tau") 
 
 mcmc_areas(posterior,  
-           pars = par_2, 
+           pars = par_1, 
            prob = 0.8, # 80% intervals
            prob_outer = 0.99, # 90%
            point_est = "median")
@@ -76,9 +78,9 @@ for (par in M_pars_name) {
   pars[[par]] = pars_name[grep(par, pars_name)]
 }
 
-color_scheme_set("yellow")
+color_scheme_set("pink")
 mcmc_areas(posterior,  
-           pars = pars$tau, 
+           pars = pars$A, #change here the parameters to look at
            prob = 0.8, # 80% intervals
            prob_outer = 0.9, # 90%
            point_est = "median")
@@ -100,18 +102,11 @@ ROC_PPC = function(fit) {
 }  
 #### ROC- Posterior Predictive Checks ####
 ROC_M  = ROC_PPC(fit_name) 
-
-ROC= data.frame(ROC=c(0.7781, 0.775, 0.7777), Model=c("M1wf", "M2wf_Out", "M2wf_Dec"))
-plot(ROC$ROC, ylim= c(0.5,1), xlab="model")
-
-
   
 #### LOOIC ####
 log_lik = extract_log_lik(fit_name, parameter_name = "log_lik_sub", merge_chains = TRUE) #log_lik
 loo <- loo(log_lik)
 print(loo) 
-sub_wise_LOOIC = loo[["pointwise"]]
-write.csv(sub_wise_LOOIC,paste0(output_name, "_sub_wise_LOOIC_MC.csv"), row.names = F)
 
 
 

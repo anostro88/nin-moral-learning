@@ -1,0 +1,8 @@
+Coding Outcomes:
+MONEY
+outcomeM = -1 --> Low monetary reward
+outcomeM = +1 --> High monetary reward
+
+SHOCK
+outcomeS = +1 --> Low shock stimulation
+outcomeS = -1 --> High shock stimulation
