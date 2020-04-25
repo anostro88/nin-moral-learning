@@ -1,4 +1,9 @@
-Coding Outcomes:
+Coding:
+
+CHOICE
+choice = 1 --> low monetary reward/ low shock stimulation
+choice = 2 --> high monetary reward/ high shock stimulation
+
 MONEY
 outcomeM = -1 --> Low monetary reward
 outcomeM = +1 --> High monetary reward

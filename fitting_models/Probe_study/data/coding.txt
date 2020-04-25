@@ -1,4 +1,10 @@
-Coding Outcomes:
+Coding:
+
+CHOICE
+choice = 1 --> low monetary reward/ low shock stimulation
+choice = 2 --> high monetary reward/ high shock stimulation
+
+
 MONEY
 outcomeM = -1 --> Low monetary reward
 outcomeM = +1 --> High monetary reward
@@ -8,3 +14,12 @@ SHOCK
 outcomeS = +1 --> Low shock stimulation
 outcomeS = -1 --> High shock stimulation
 outcomeS = 0 --> trials with no shock sent
+
+FILTER_SHOCK
+filter_isshock = 0  --> trials with no shock sent
+filter_isshock = 1  --> trials with shock sent
+
+FILTER_MONEY
+filter_ismoney = 0  --> trials with no monetary reward
+filter_ismoney = 1  --> trials with monetary reward
+
