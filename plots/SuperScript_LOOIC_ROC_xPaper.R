@@ -7,20 +7,21 @@ library(loo)
 
 # Set path to the location of the script
 rm(list=ls())
+data_folder = "plots/data/"
 
 Ntrial = 20
 Ntrial_long = 120
 Nblock = 6
-sub_id_map = read.csv("data/sublist.csv", stringsAsFactors = F)
-choice = read.csv("data/data_vertical.csv", stringsAsFactors = F)
-m1wf = read.csv("data/20T_M1wf_F-AF_summary.csv", stringsAsFactors = F)
-m2wf_out = read.csv("data/20T_M2wf_wfOut_F-AF_summary.csv", stringsAsFactors = F)
-m2wf_dec = read.csv("data/20T_M2wf_wfDec_F-AF_summary.csv", stringsAsFactors = F)
+sub_id_map = read.csv(paste0(data_folder, "sublist.csv"), stringsAsFactors = F)
+choice = read.csv(paste0(data_folder, "data_vertical.csv"), stringsAsFactors = F)
+m1wf = read.csv(paste0(data_folder, "20T_M1wf_F-AF_summary.csv"), stringsAsFactors = F)
+m2wf_out = read.csv(paste0(data_folder, "20T_M2wf_wfOut_F-AF_summary.csv"), stringsAsFactors = F)
+m2wf_dec = read.csv(paste0(data_folder, "20T_M2wf_wfDec_F-AF_summary.csv"), stringsAsFactors = F)
 
 ##### LogLikelihood and LOOIC #####
-source("get_all_LogLik.R")
+source("plots/get_all_LogLik.R")
 log_lik_raw = tmp2
-source("compute_LOOIC_11th_trial.R")
+source("plots/compute_LOOIC_11th_trial.R")
 df = LOOIC_over_trials
 LOOIC_data_long <- melt(df, id="trialNr")  # convert to long format
 
@@ -37,7 +38,7 @@ LOOIC_plot = ggplot(data=LOOIC_data_long,aes(x=trialNr, y=value, colour=variable
 
 ##### WAIC #####
 log_lik_raw = tmp2
-source("compute_WAIC_11th_trial.R")
+source("plots/compute_WAIC_11th_trial.R")  # MISSING FILE
 df = WAIC_over_trials
 WAIC_data_long <- melt(df, id="trialNr")  # convert to long format
 
@@ -48,7 +49,7 @@ choice = choice[order(choice$subID), ]
 choice$choice = choice$choice - 1
 choice$shockOutcome = NULL
 choice$rewardOutcome = NULL
-source("dataset3_eeg_computational_modeling/plot_tbt/get_all_y_pred.R")
+source("dataset3_eeg_computational_modeling/plot_tbt/get_all_y_pred.R")  # ???
 df = merge(choice, y_pred_recoded, by = c("subID", "trialNr", "blockNr") )
 
 AUC_overTrials = data.frame(trialNr = c(), m1_auc = c(), m2_auc = c())
