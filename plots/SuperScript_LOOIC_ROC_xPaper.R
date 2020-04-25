@@ -49,7 +49,7 @@ choice = choice[order(choice$subID), ]
 choice$choice = choice$choice - 1
 choice$shockOutcome = NULL
 choice$rewardOutcome = NULL
-source("dataset3_eeg_computational_modeling/plot_tbt/get_all_y_pred.R")  # ???
+source("plots/get_all_y_pred.R")
 df = merge(choice, y_pred_recoded, by = c("subID", "trialNr", "blockNr") )
 
 AUC_overTrials = data.frame(trialNr = c(), m1_auc = c(), m2_auc = c())
@@ -67,7 +67,7 @@ for (t in 1:Ntrial){
 }
 
 df = AUC_overTrials
-write.csv(df, "dataset3_eeg_computational_modeling/output/AUC_overTrials.csv", row.names = F)
+write.csv(df, "plots/output/AUC_overTrials.csv", row.names = F)
 ROC_data_long <- melt(df, id="trialNr")  # convert to long format
 
 ROC_plot = ggplot(data=ROC_data_long,aes(x=trialNr, y=value, colour=variable)) + 
@@ -80,5 +80,5 @@ ROC_plot = ggplot(data=ROC_data_long,aes(x=trialNr, y=value, colour=variable)) +
   theme_bw()
 
 
-grid.arrange(LOOIC_plot, ROC_plot, ncol =1)
+grid.arrange(LOOIC_plot, ROC_plot, ncol =1)  # ???
 
